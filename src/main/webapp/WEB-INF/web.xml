@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+    <context-param>
+        <description>config file for database access</description>
+        <param-name>db_access_properties</param-name>
+        <param-value>/WEB-INF/config/database_access.properties</param-value>
+    </context-param>
+    <context-param>
+        <description>config file for prob engine</description>
+        <param-name>prob_engine_properties</param-name>
+        <param-value>/WEB-INF/config/probabilistic_engine.properties</param-value>
+    </context-param>
+    <listener>
+        <description>General common fields</description>
+        <listener-class>uk.ac.surrey.ee.iot.s2w.common.GeneralConfig</listener-class>
+    </listener>
+    <listener>
+        <description>load global database config</description>
+        <listener-class>uk.ac.surrey.ee.iot.s2w.store.TripleStoreStartup</listener-class>
+    </listener>
+    <servlet>
+        <servlet-name>RestletServlet</servlet-name>
+        <servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
+        <init-param>
+            <!-- Application class name -->
+            <param-name>org.restlet.application</param-name>
+            <param-value>uk.ac.surrey.ee.iot.s2w.endpoint.restlet.RestReqApplication</param-value>
+        </init-param>
+        <init-param>
+            <param-name>org.restlet.clients</param-name>
+            <param-value>HTTP HTTPS FILE</param-value>
+        </init-param>
+    </servlet>
+    <!--    <servlet>
+        <description>Enable directory listing</description>
+        <servlet-name>DirectoryListing</servlet-name>
+        <servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>
+        <init-param>
+            <description>**make sure the link end with "/"</description>
+            <param-name>listings</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    <load-on-startup>1</load-on-startup>I
+    </servlet>-->
+    <servlet-mapping>
+        <servlet-name>RestletServlet</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+    <!--    <servlet-mapping>
+        <servlet-name>DirectoryListing</servlet-name>
+        <url-pattern>/share/*</url-pattern>
+    </servlet-mapping>-->
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+    <absolute-ordering/>
+</web-app>
