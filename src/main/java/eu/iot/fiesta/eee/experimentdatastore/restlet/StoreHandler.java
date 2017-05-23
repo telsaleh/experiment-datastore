@@ -15,17 +15,14 @@ import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
-/**
- * Resource which has only one representation.
- */
+
 public class StoreHandler extends ServerResource {
 
     @Post
     public Representation handleRegister(Representation entity) throws ResourceException, IOException {
 
-        String repoId = (String) getRequest().getAttributes().get("repository_id");
+        String repoId = (String) getRequest().getAttributes().get("result_id");
         String reqBody = entity.getText();
-
 
         return new StringRepresentation(reqBody);
     }
@@ -33,10 +30,10 @@ public class StoreHandler extends ServerResource {
     @Get
     public Representation handleLookup() {
 
-        String repoId = (String) getRequest().getAttributes().get("repository_id");
+        String repoId = (String) getRequest().getAttributes().get("result_id");
         String resURI = getRequest().getResourceRef().toUri().toString();
 
-        return new StringRepresentation("GET called");
+        return new StringRepresentation("result required: "+repoId);
     }
 
     @Put
@@ -44,7 +41,7 @@ public class StoreHandler extends ServerResource {
 
         Representation result;
         String reqBody = entity.getText();
-        String repoId = (String) getRequest().getAttributes().get("repository_id");
+        String repoId = (String) getRequest().getAttributes().get("result_id");
         String resourceId = (String) getRequest().getAttributes().get("resource_id");
 
 

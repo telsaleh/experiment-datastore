@@ -24,8 +24,7 @@
             <id>sonatype-forge-snapshots</id>
             <url>https://repository.sonatype.org/content/groups/forge/</url>
         </repository>
-    </repositories>
- 
+    </repositories> 
     <dependencies>
         <dependency>
             <groupId>javax</groupId>

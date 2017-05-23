@@ -10,21 +10,13 @@
         <param-name>prob_engine_properties</param-name>
         <param-value>/WEB-INF/config/probabilistic_engine.properties</param-value>
     </context-param>
-    <listener>
-        <description>General common fields</description>
-        <listener-class>uk.ac.surrey.ee.iot.s2w.common.GeneralConfig</listener-class>
-    </listener>
-    <listener>
-        <description>load global database config</description>
-        <listener-class>uk.ac.surrey.ee.iot.s2w.store.TripleStoreStartup</listener-class>
-    </listener>
     <servlet>
         <servlet-name>RestletServlet</servlet-name>
         <servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
         <init-param>
             <!-- Application class name -->
             <param-name>org.restlet.application</param-name>
-            <param-value>uk.ac.surrey.ee.iot.s2w.endpoint.restlet.RestReqApplication</param-value>
+            <param-value>eu.iot.fiesta.eee.experimentdatastore.restlet.RestReqApplication</param-value>
         </init-param>
         <init-param>
             <param-name>org.restlet.clients</param-name>
