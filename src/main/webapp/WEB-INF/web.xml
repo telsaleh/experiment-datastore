@@ -5,11 +5,10 @@
         <param-name>db_access_properties</param-name>
         <param-value>/WEB-INF/config/database_access.properties</param-value>
     </context-param>
-    <context-param>
-        <description>config file for prob engine</description>
-        <param-name>prob_engine_properties</param-name>
-        <param-value>/WEB-INF/config/probabilistic_engine.properties</param-value>
-    </context-param>
+    <listener>
+        <description>ServletContextListener</description>
+        <listener-class>eu.iot.fiesta.eee.experimentdatastore.store.StoreStartup</listener-class>
+    </listener>
     <servlet>
         <servlet-name>RestletServlet</servlet-name>
         <servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>

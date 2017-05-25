@@ -22,8 +22,8 @@ public class RestReqApplication extends Application {
 
         Router router = new Router(getContext());
         
-//        router.attach("", StoreHandler.class);        
-        router.attach("/{result_id}", StoreHandler.class); //POST, GET, UPDATE, DELETE        
+        router.attachDefault(StoreHandler.class);        
+//        router.attach("/{result_id}", StoreHandler.class); //POST, GET, UPDATE, DELETE        
         
         return router;
     }

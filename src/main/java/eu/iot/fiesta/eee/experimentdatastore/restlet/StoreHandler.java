@@ -4,8 +4,16 @@
  */
 package eu.iot.fiesta.eee.experimentdatastore.restlet;
 
-
+import eu.iot.fiesta.eee.experimentdatastore.store.StoreAccess;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import eu.iot.fiesta.eee.experimentdatastore.model.KatResult;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.restlet.data.Header;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Delete;
@@ -14,26 +22,66 @@ import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
-
+import org.restlet.util.Series;
 
 public class StoreHandler extends ServerResource {
 
     @Post
     public Representation handleRegister(Representation entity) throws ResourceException, IOException {
 
-        String repoId = (String) getRequest().getAttributes().get("result_id");
-        String reqBody = entity.getText();
+        Series<Header> series = (Series<Header>) getRequestAttributes().get("org.restlet.http.headers");
+//      String userId = series.getValuesMap().keySet().toString();
+        String userId = series.getFirstValue("userId", true);
+        String fismoId = series.getFirstValue("fismoId", true);
 
-        return new StringRepresentation(reqBody);
+        String reqBody = entity.getText();
+        
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        
+        KatResult katResult = new KatResult();
+        
+        try {
+            katResult = objectMapper.readValue(reqBody, KatResult.class);
+        } catch (IOException ex) {
+            Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        StoreAccess sa = new StoreAccess();
+        try {
+            sa.storeExperimentResult(userId,fismoId,katResult);
+        } catch (SQLException ex) {
+            Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+
+        return new StringRepresentation("done");
     }
 
     @Get
     public Representation handleLookup() {
 
-        String repoId = (String) getRequest().getAttributes().get("result_id");
-        String resURI = getRequest().getResourceRef().toUri().toString();
+        Series<Header> series = (Series<Header>) getRequestAttributes().get("org.restlet.http.headers");
+//      String userId = series.getValuesMap().keySet().toString();
+        String userId = series.getFirstValue("userId", true);
+        String fismoId = series.getFirstValue("fismoId", true);
+        
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        
+//        KatResult katResult = new KatResult();
+        String result = "";
+        
+         StoreAccess sa = new StoreAccess();
+        try {
+            result = sa.getExperimentResult(userId,fismoId);
+        } catch (SQLException ex) {
+            Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
-        return new StringRepresentation("result required: "+repoId);
+        return new StringRepresentation(result);
     }
 
     @Put
@@ -44,8 +92,6 @@ public class StoreHandler extends ServerResource {
         String repoId = (String) getRequest().getAttributes().get("result_id");
         String resourceId = (String) getRequest().getAttributes().get("resource_id");
 
-
-        
         return new StringRepresentation(reqBody);
 
     }
@@ -57,7 +103,6 @@ public class StoreHandler extends ServerResource {
         String repoId = (String) getRequest().getAttributes().get("repository_id");
         String resourceId = (String) getRequest().getAttributes().get("resource_id");
 
-       
         return new StringRepresentation("DELETE called");
 
     }
