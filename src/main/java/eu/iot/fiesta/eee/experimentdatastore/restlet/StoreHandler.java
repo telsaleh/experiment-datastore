@@ -30,9 +30,9 @@ public class StoreHandler extends ServerResource {
     public Representation handleRegister(Representation entity) throws ResourceException, IOException {
 
         Series<Header> series = (Series<Header>) getRequestAttributes().get("org.restlet.http.headers");
-//      String userId = series.getValuesMap().keySet().toString();
         String userId = series.getFirstValue("userId", true);
-        String fismoId = series.getFirstValue("fismoId", true);
+        String femoId = series.getFirstValue("femoId", true);
+        String jobId = series.getFirstValue("jobId", true);
 
         String reqBody = entity.getText();
         
@@ -50,7 +50,7 @@ public class StoreHandler extends ServerResource {
         
         StoreAccess sa = new StoreAccess();
         try {
-            sa.storeExperimentResult(userId,fismoId,katResult);
+            sa.storeExperimentResult(userId, femoId, jobId, katResult);
         } catch (SQLException ex) {
             Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -65,7 +65,8 @@ public class StoreHandler extends ServerResource {
         Series<Header> series = (Series<Header>) getRequestAttributes().get("org.restlet.http.headers");
 //      String userId = series.getValuesMap().keySet().toString();
         String userId = series.getFirstValue("userId", true);
-        String fismoId = series.getFirstValue("fismoId", true);
+        String femoId = series.getFirstValue("femoId", true);
+        String jobId = series.getFirstValue("jobId", true);
         
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -76,7 +77,7 @@ public class StoreHandler extends ServerResource {
         
          StoreAccess sa = new StoreAccess();
         try {
-            result = sa.getExperimentResult(userId,fismoId);
+            result = sa.getExperimentResult(userId, femoId, jobId);
         } catch (SQLException ex) {
             Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
