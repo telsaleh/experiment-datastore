@@ -28,15 +28,16 @@ public class StoreStartup implements ServletContextListener {
     protected static String DB_USERNAME = "";
     protected static String DB_PASSWORD = "";
     public static String DB_CONNECTION = "";
+    public static ServletContext context;
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         
-        ServletContext context = sce.getServletContext();
+        context = sce.getServletContext();
         
         Properties dbProp = new Properties();
         try {
-            String path = context.getInitParameter("db_access_properties");
+            String path = context.getInitParameter("db");
             final InputStream is = context.getResourceAsStream(path);
             dbProp.load(is);
         } catch (IOException ex) {

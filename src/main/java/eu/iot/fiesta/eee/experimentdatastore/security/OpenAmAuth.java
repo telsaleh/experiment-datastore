@@ -9,8 +9,13 @@ import eu.iot.fiesta.eee.experimentdatastore.model.user.UserResolveResponse;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import eu.iot.fiesta.eee.experimentdatastore.store.StoreStartup;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.ServletContext;
 import org.restlet.Client;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
@@ -26,9 +31,21 @@ import org.restlet.resource.ResourceException;
  */
 public class OpenAmAuth {
 
-    private final String OPEN_AM_RESOLVE_USER_URL = "https://platform-dev.fiesta-iot.eu/openam/json/users?_action=idFromSession";
+    private String OPEN_AM_RESOLVE_USER_URL = "";
 
     public OpenAmAuth() {
+
+        try {
+            Properties globalProp = new Properties();
+            ServletContext context = StoreStartup.context;
+            String path = context.getInitParameter("global");
+            final InputStream is = context.getResourceAsStream(path);
+            globalProp.load(is);
+            OPEN_AM_RESOLVE_USER_URL = globalProp.getProperty("hostname");
+        } catch (IOException | NoClassDefFoundError ex) {
+            System.out.println(ex.getMessage());
+            OPEN_AM_RESOLVE_USER_URL = "https://platform-dev.fiesta-iot.eu/openam/json/users?_action=idFromSession";
+        }
     }
 
     public String getUserId(String openAmToken) {
@@ -75,7 +92,7 @@ public class OpenAmAuth {
     public static void main(String[] argv) {
 
         OpenAmAuth oaa = new OpenAmAuth();
-        String openAmToken = "AQIC5wM2LY4SfcycOvfSm2_acwuo4WehlInjXBUdEPevgwA.*AAJTSQACMDEAAlNLABQtODcxMzY2NDE1MTc0NzA1OTczMgACUzEAAA..*";
+        String openAmToken = "AQIC5wM2LY4SfcyaHmTqpOYOdFtwGFGR60Tm_WuYMXksVsc.*AAJTSQACMDEAAlNLABMtNjU4OTMxMjQwOTQyNzAzOTIwAAJTMQAA*";
         String result = oaa.getUserId(openAmToken);
 
         if (result.contains(" ")) {

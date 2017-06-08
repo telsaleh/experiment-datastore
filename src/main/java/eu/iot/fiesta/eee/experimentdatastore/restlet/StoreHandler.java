@@ -82,9 +82,6 @@ public class StoreHandler extends ServerResource {
             
         }
         
-        
-        
-//        KatResult katResult = new KatResult();
         String result = "";
         
          StoreAccess sa = new StoreAccess();
@@ -97,8 +94,7 @@ public class StoreHandler extends ServerResource {
         } catch (SQLException ex) {
             Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        return new StringRepresentation(result);
+        return new StringRepresentation(result, MediaType.APPLICATION_JSON);
     }
 
     @Put

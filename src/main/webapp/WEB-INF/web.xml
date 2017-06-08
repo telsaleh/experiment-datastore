@@ -2,8 +2,13 @@
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
     <context-param>
         <description>config file for database access</description>
-        <param-name>db_access_properties</param-name>
-        <param-value>/WEB-INF/config/database_access.properties</param-value>
+        <param-name>db</param-name>
+        <param-value>/WEB-INF/config/db.properties</param-value>
+    </context-param>
+    <context-param>
+        <description>global properties</description>
+        <param-name>global</param-name>
+        <param-value>/WEB-INF/config/global.properties</param-value>
     </context-param>
     <listener>
         <description>ServletContextListener</description>
