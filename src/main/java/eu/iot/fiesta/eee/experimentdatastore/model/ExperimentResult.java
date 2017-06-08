@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
 "Result"
 })
-public class KatResult {
+public class ExperimentResult {
     
 
 @JsonProperty("Result")
@@ -26,9 +26,9 @@ public String getResult() {
 return result;
 }
 
-public KatResult() {}
+public ExperimentResult() {}
 
-public KatResult(String result) {
+public ExperimentResult(String result) {
     
     this.result = result;
         

@@ -23,7 +23,7 @@ public class StoreStartup implements ServletContextListener {
     
     protected static String DB_HOSTNAME = "";
     protected static String DB_PORT = "";
-    protected static String DB_PATH = "";
+    protected static String DB_NAME = "";
     
     protected static String DB_USERNAME = "";
     protected static String DB_PASSWORD = "";
@@ -44,11 +44,11 @@ public class StoreStartup implements ServletContextListener {
         }
         DB_HOSTNAME = dbProp.getProperty("hostname");
         DB_PORT = dbProp.getProperty("port");
-        DB_PATH = dbProp.getProperty("path");
+        DB_NAME = dbProp.getProperty("name");
 
         DB_USERNAME = dbProp.getProperty("username");
         DB_PASSWORD = dbProp.getProperty("password");
-        DB_CONNECTION = "jdbc:mysql://" + DB_HOSTNAME + ":" + DB_PORT + DB_PATH;
+        DB_CONNECTION = "jdbc:mysql://" + DB_HOSTNAME + ":" + DB_PORT +"/"+ DB_NAME;
         
     }
 

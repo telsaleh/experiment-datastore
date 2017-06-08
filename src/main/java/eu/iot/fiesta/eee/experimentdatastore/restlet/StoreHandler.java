@@ -6,14 +6,18 @@ package eu.iot.fiesta.eee.experimentdatastore.restlet;
 
 import eu.iot.fiesta.eee.experimentdatastore.store.StoreAccess;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import eu.iot.fiesta.eee.experimentdatastore.model.KatResult;
+import eu.iot.fiesta.eee.experimentdatastore.model.ExperimentResult;
+import eu.iot.fiesta.eee.experimentdatastore.security.OpenAmAuth;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.restlet.data.Header;
+import org.restlet.data.MediaType;
+import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Delete;
@@ -40,10 +44,10 @@ public class StoreHandler extends ServerResource {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         
-        KatResult katResult = new KatResult();
+        ExperimentResult katResult = new ExperimentResult();
         
         try {
-            katResult = objectMapper.readValue(reqBody, KatResult.class);
+            katResult = objectMapper.readValue(reqBody, ExperimentResult.class);
         } catch (IOException ex) {
             Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -64,20 +68,32 @@ public class StoreHandler extends ServerResource {
 
         Series<Header> series = (Series<Header>) getRequestAttributes().get("org.restlet.http.headers");
 //      String userId = series.getValuesMap().keySet().toString();
-        String userId = series.getFirstValue("userId", true);
+        String tokenId = series.getFirstValue("iPlanetDirectoryPro", true);
         String femoId = series.getFirstValue("femoId", true);
         String jobId = series.getFirstValue("jobId", true);
         
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        OpenAmAuth oaa = new OpenAmAuth();
+        
+        String userId = oaa.getUserId(tokenId);
+        
+        if (userId.contains(" ")) {
+            setStatus(Status.CLIENT_ERROR_UNAUTHORIZED, "token does not belong to an authorized user");
+            return new StringRepresentation(userId, MediaType.APPLICATION_JSON);
+            
+        }
+        
+        
         
 //        KatResult katResult = new KatResult();
         String result = "";
         
          StoreAccess sa = new StoreAccess();
         try {
-            result = sa.getExperimentResult(userId, femoId, jobId);
+            try {
+                result = sa.getExperimentResult(userId, femoId, jobId);
+            } catch (JsonProcessingException ex) {
+                Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } catch (SQLException ex) {
             Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
         }

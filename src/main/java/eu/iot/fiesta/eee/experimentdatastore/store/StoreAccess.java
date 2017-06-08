@@ -5,8 +5,16 @@
  */
 package eu.iot.fiesta.eee.experimentdatastore.store;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
-import eu.iot.fiesta.eee.experimentdatastore.model.KatResult;
+import eu.iot.fiesta.eee.experimentdatastore.model.ExperimentResult;
+import eu.iot.fiesta.eee.experimentdatastore.model.user.FemoResult;
+import eu.iot.fiesta.eee.experimentdatastore.model.user.FemoResults;
+import eu.iot.fiesta.eee.experimentdatastore.model.user.JobResult;
+import eu.iot.fiesta.eee.experimentdatastore.model.user.SqlResult;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -16,6 +24,9 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,7 +39,8 @@ public class StoreAccess {
     private static final String DB_DRIVER = "com.mysql.jdbc.Driver";
     private static final String DB_USERNAME = "fiesta";
     private static final String DB_PASSWORD = "fiesta";
-    private static final String DB_CONNECTION = "jdbc:mysql://localhost:3307/test2";//?user=" + DB_USERNAME + "&password=" + DB_PASSWORD;
+    private static final String DB_NAME = "test2";
+    private static final String DB_CONNECTION = "jdbc:mysql://localhost:3307/" + DB_NAME;//?user=" + DB_USERNAME + "&password=" + DB_PASSWORD;
 
     private static final DateFormat DATE_FORMAT = new ISO8601DateFormat();
 
@@ -36,17 +48,23 @@ public class StoreAccess {
 
         StoreAccess sa = new StoreAccess();
 
+        System.out.println(DB_CONNECTION);
+
         try {
-            sa.storeExperimentResult("1234", "567", "890", new KatResult("test1"));
-//            String exprResult = sa.getExperimentResult("user1234", "femo567", "fismo890");
-//            System.out.println("exprResult: "+ exprResult);
+            try {
+                //            sa.storeExperimentResult("tarek", "567", "900", new ExperimentResult("test1"));
+                String exprResult = sa.getExperimentResult("surreyadmin", "567", "");
+            System.out.println("This is the json payload:\n" + exprResult);
+            } catch (JsonProcessingException ex) {
+                Logger.getLogger(StoreAccess.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } catch (SQLException ex) {
             Logger.getLogger(StoreAccess.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
 
-    public void storeExperimentResult(String userId, String femoId, String jobId, KatResult result) throws SQLException {
+    public void storeExperimentResult(String userId, String femoId, String jobId, ExperimentResult result) throws SQLException {
 
         Connection dbConnection = null;
         Statement statement = null;
@@ -64,7 +82,7 @@ public class StoreAccess {
             preparedStmt.setString(2, femoId);
             preparedStmt.setString(3, jobId);
             preparedStmt.setTimestamp(4, Timestamp.from(Instant.now()));
-        //preparedStmt.setTimestamp(4, Timestamp.valueOf(DATE_FORMAT.format(new Date())));
+            //preparedStmt.setTimestamp(4, Timestamp.valueOf(DATE_FORMAT.format(new Date())));
             preparedStmt.setString(5, result.getResult());
 
             System.out.println(preparedStmt.toString());
@@ -91,41 +109,90 @@ public class StoreAccess {
 
     }
 
-    public String getExperimentResult(String userId, String femoId, String jobId) throws SQLException {
+    public String getExperimentResult(String userId, String femoId, String jobId) throws SQLException, JsonProcessingException {
 
         Connection dbConnection = null;
         Statement statement = null;
 
-        String selectTableSQL = "SELECT EXPR_RESULT FROM test2.experiment "
-                + "WHERE (USER_ID = \'" + userId + "\' AND FEMO_ID = \'" + femoId + "\'AND JOB_ID = \'" + jobId + "\');";
-        
+        String dbName = "";
+
+        try {
+            dbName = StoreStartup.DB_NAME;
+        } catch (NoClassDefFoundError ex) {
+            dbName = DB_NAME;
+        }
+
+        String selectSqlQuery = "SELECT FEMO_ID, JOB_ID, TIME_STAMP, EXPR_RESULT FROM " + dbName + ".experiment "
+                + "WHERE (USER_ID = \'" + userId + "\' AND (FEMO_ID = \'" + femoId + "\' OR JOB_ID = \'" + jobId + "\')) ORDER BY JOB_ID;";
+
         String exprResult = "";
 
         try {
             dbConnection = getDBConnection();
             statement = dbConnection.createStatement();
 
-            System.out.println(selectTableSQL);
+            System.out.println(selectSqlQuery);
 
-            // execute select SQL stetement
-            ResultSet rs = statement.executeQuery(selectTableSQL);
+            // execute select SQL statement
+            ResultSet rs = statement.executeQuery(selectSqlQuery);
+
+            String timestamp = "";            
+            ArrayList<SqlResult> sqlResList = new ArrayList();    
 
             while (rs.next()) {
+//                femoId = rs.getString("FEMO_ID");
 
-//                userId = rs.getString("USER_ID");
-//                fismoId = rs.getString("FISMO_ID");
-//                String timestamp = rs.getString("TIME_STAMP");
+                jobId = rs.getString("JOB_ID");
+                timestamp = rs.getString("TIME_STAMP").replace(" ", "T").concat("Z");
                 exprResult = rs.getString("EXPR_RESULT");
-
-                System.out.println("userid : " + userId);
-                System.out.println("fismoId : " + jobId);
-//                System.out.println("userid : " + timestamp);
-                System.out.println("exprResult : " + exprResult);
                 
+                SqlResult sqlr = new SqlResult(femoId, jobId, timestamp, exprResult);
+                sqlResList.add(sqlr);
+//                System.out.println("userid : " + userId + "\tfemoId : " + femoId + "\t jobId : " + jobId + "\ttimestamp : " + timestamp + "\texprResult : " + exprResult);
             }
+            
+            ArrayList<String> jobIds = new ArrayList<>();            
+            for (int i=0; i<sqlResList.size(); i++)
+            {
+                jobIds.add(sqlResList.get(i).getJobId());
+            }
+            
+            Set<String> hs = new LinkedHashSet<>();
+            hs.addAll(jobIds);
+            jobIds.clear();
+            jobIds.addAll(hs);
+            
+            FemoResults femoResults = new FemoResults();
+            ArrayList<FemoResult> frlist = new ArrayList<>();
+            
+            System.out.println("size of jobIds: "+jobIds.size());
+                        
+            for (int i=0; i<jobIds.size(); i++)
+            {
+                
+                String jobid = jobIds.get(i);
+                ArrayList<JobResult> jrList = new ArrayList<>();
+                
+                for (int j=0; j<sqlResList.size(); j++){
+                
+                    if (sqlResList.get(j).getJobId().equalsIgnoreCase(jobid)){
+                        jrList.add(new JobResult(sqlResList.get(j).getTimestamp(), sqlResList.get(j).getExprResult()));
+                    }
+                }
+                
+                FemoResult femoResult = new FemoResult(jobid, jrList);
+                frlist.add(femoResult);                
+            }
+            femoResults.setFemoResults(frlist);
+            
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);        
+        exprResult = objectMapper.writeValueAsString(femoResults);
+            
 
         } catch (SQLException e) {
-
+            e.printStackTrace();
             System.out.println(e.getMessage());
             exprResult = "INVALID SQL QUERY";
 
@@ -140,8 +207,8 @@ public class StoreAccess {
             }
 
         }
-        
-         return exprResult;
+
+        return exprResult;
 
     }
 
@@ -154,7 +221,7 @@ public class StoreAccess {
             Class.forName(StoreStartup.DB_DRIVER);
 
         } catch (ClassNotFoundException | java.lang.NoClassDefFoundError e) {
-            
+
             try {
                 Class.forName(DB_DRIVER);
             } catch (ClassNotFoundException ex) {
@@ -172,7 +239,7 @@ public class StoreAccess {
             return dbConnection;
 
         } catch (SQLException | java.lang.NoClassDefFoundError e) {
-            
+
             try {
                 dbConnection = DriverManager.getConnection(
                         DB_CONNECTION, DB_USERNAME, DB_PASSWORD);

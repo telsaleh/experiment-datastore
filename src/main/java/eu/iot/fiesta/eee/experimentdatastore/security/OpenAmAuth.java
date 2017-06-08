@@ -5,6 +5,7 @@
  */
 package eu.iot.fiesta.eee.experimentdatastore.security;
 
+import eu.iot.fiesta.eee.experimentdatastore.model.user.UserResolveResponse;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -31,7 +32,7 @@ public class OpenAmAuth {
     }
 
     public String getUserId(String openAmToken) {
-        
+
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
@@ -46,9 +47,9 @@ public class OpenAmAuth {
 //        Series<Header> headers = (Series<Header>) sicsClientResource.getRequestAttributes().get("org.restlet.http.headers");
 //        System.out.println(headers.size());
 //        headers.add("iPlanetDirectoryPro", openAmToken);
-          oaClientRes.getRequest().getHeaders().add("iPlanetDirectoryPro", openAmToken);
-          System.out.println(oaClientRes.getRequest().getHeaders().getFirstValue("iPlanetDirectoryPro"));
-        
+        oaClientRes.getRequest().getHeaders().add("iPlanetDirectoryPro", openAmToken);
+        System.out.println(oaClientRes.getRequest().getHeaders().getFirstValue("iPlanetDirectoryPro"));
+
         String messageResponse = "";
 
         try {
@@ -72,12 +73,16 @@ public class OpenAmAuth {
     }
 
     public static void main(String[] argv) {
-        
+
         OpenAmAuth oaa = new OpenAmAuth();
-        String openAmToken = "AQIC5wM2LY4SfcwNd6NhHM40Otufub0O-IGZSpimcRZv4zA.*AAJTSQACMDEAAlNLABM1Nzg0Njg2MTc3ODAwMTA0NTExAAJTMQAA*";
-        String result = oaa.getUserId(openAmToken); 
-        System.out.println("message response is: "+result);
-        
+        String openAmToken = "AQIC5wM2LY4SfcycOvfSm2_acwuo4WehlInjXBUdEPevgwA.*AAJTSQACMDEAAlNLABQtODcxMzY2NDE1MTc0NzA1OTczMgACUzEAAA..*";
+        String result = oaa.getUserId(openAmToken);
+
+        if (result.contains(" ")) {
+            System.out.println("error response is: " + result);
+        } else {
+            System.out.println("message response is: " + result);
+        }
 
     }
 
