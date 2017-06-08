@@ -54,7 +54,7 @@ public class StoreAccess {
             try {
                 //            sa.storeExperimentResult("tarek", "567", "900", new ExperimentResult("test1"));
                 String exprResult = sa.getExperimentResult("surreyadmin", "567", "");
-            System.out.println("This is the json payload:\n" + exprResult);
+                System.out.println("This is the json payload:\n" + exprResult);
             } catch (JsonProcessingException ex) {
                 Logger.getLogger(StoreAccess.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -125,71 +125,31 @@ public class StoreAccess {
         String selectSqlQuery = "SELECT FEMO_ID, JOB_ID, TIME_STAMP, EXPR_RESULT FROM " + dbName + ".experiment "
                 + "WHERE (USER_ID = \'" + userId + "\' AND (FEMO_ID = \'" + femoId + "\' OR JOB_ID = \'" + jobId + "\')) ORDER BY JOB_ID;";
 
+        String deleteSqlQuery = "DELETE FROM " + dbName + ".experiment "
+                + "WHERE (USER_ID = \'" + userId + "\' AND (FEMO_ID = \'" + femoId + "\' OR JOB_ID = \'" + jobId + "\')) ORDER BY JOB_ID;";
+
         String exprResult = "";
 
         try {
             dbConnection = getDBConnection();
             statement = dbConnection.createStatement();
-
             System.out.println(selectSqlQuery);
-
             // execute select SQL statement
             ResultSet rs = statement.executeQuery(selectSqlQuery);
 
-            String timestamp = "";            
-            ArrayList<SqlResult> sqlResList = new ArrayList();    
+            String timestamp = "";
+            ArrayList<SqlResult> sqlResList = new ArrayList();
 
             while (rs.next()) {
-//                femoId = rs.getString("FEMO_ID");
-
                 jobId = rs.getString("JOB_ID");
                 timestamp = rs.getString("TIME_STAMP").replace(" ", "T").concat("Z");
                 exprResult = rs.getString("EXPR_RESULT");
-                
                 SqlResult sqlr = new SqlResult(femoId, jobId, timestamp, exprResult);
                 sqlResList.add(sqlr);
 //                System.out.println("userid : " + userId + "\tfemoId : " + femoId + "\t jobId : " + jobId + "\ttimestamp : " + timestamp + "\texprResult : " + exprResult);
             }
-            
-            ArrayList<String> jobIds = new ArrayList<>();            
-            for (int i=0; i<sqlResList.size(); i++)
-            {
-                jobIds.add(sqlResList.get(i).getJobId());
-            }
-            
-            Set<String> hs = new LinkedHashSet<>();
-            hs.addAll(jobIds);
-            jobIds.clear();
-            jobIds.addAll(hs);
-            
-            FemoResults femoResults = new FemoResults();
-            ArrayList<FemoResult> frlist = new ArrayList<>();
-            
-            System.out.println("size of jobIds: "+jobIds.size());
-                        
-            for (int i=0; i<jobIds.size(); i++)
-            {
-                
-                String jobid = jobIds.get(i);
-                ArrayList<JobResult> jrList = new ArrayList<>();
-                
-                for (int j=0; j<sqlResList.size(); j++){
-                
-                    if (sqlResList.get(j).getJobId().equalsIgnoreCase(jobid)){
-                        jrList.add(new JobResult(sqlResList.get(j).getTimestamp(), sqlResList.get(j).getExprResult()));
-                    }
-                }
-                
-                FemoResult femoResult = new FemoResult(jobid, jrList);
-                frlist.add(femoResult);                
-            }
-            femoResults.setFemoResults(frlist);
-            
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);        
-        exprResult = objectMapper.writeValueAsString(femoResults);
-            
+
+            exprResult = annotateResults(sqlResList);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -207,9 +167,72 @@ public class StoreAccess {
             }
 
         }
+        
+        deleteExprResults(deleteSqlQuery);
 
         return exprResult;
 
+    }
+    
+     public String annotateResults(ArrayList<SqlResult> sqlResList) {
+         
+         ArrayList<String> jobIds = new ArrayList<>();
+            for (int i = 0; i < sqlResList.size(); i++) {
+                jobIds.add(sqlResList.get(i).getJobId());
+            }
+
+            Set<String> hs = new LinkedHashSet<>();
+            hs.addAll(jobIds);
+            jobIds.clear();
+            jobIds.addAll(hs);
+
+            FemoResults femoResults = new FemoResults();
+            ArrayList<FemoResult> frlist = new ArrayList<>();
+
+            System.out.println("size of jobIds: " + jobIds.size());
+
+            for (int i = 0; i < jobIds.size(); i++) {
+
+                String jobid = jobIds.get(i);
+                ArrayList<JobResult> jrList = new ArrayList<>();
+
+                for (int j = 0; j < sqlResList.size(); j++) {
+
+                    if (sqlResList.get(j).getJobId().equalsIgnoreCase(jobid)) {
+                        jrList.add(new JobResult(sqlResList.get(j).getTimestamp(), sqlResList.get(j).getExprResult()));
+                    }
+                }
+
+                FemoResult femoResult = new FemoResult(jobid, jrList);
+                frlist.add(femoResult);
+            }
+            femoResults.setFemoResults(frlist);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+            objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+            String exprResult="";
+        try {
+            exprResult = objectMapper.writeValueAsString(femoResults);
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(StoreAccess.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            
+            return exprResult;
+         
+     }
+
+    public static void deleteExprResults(String sqlStatement) {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection connection = getDBConnection();
+            PreparedStatement st = connection.prepareStatement(sqlStatement);
+//            st.setString(1, name);
+            st.executeUpdate();
+
+        } catch (ClassNotFoundException | SQLException e) {
+            System.out.println(e);
+        }
     }
 
     private static Connection getDBConnection() {
