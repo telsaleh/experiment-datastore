@@ -52,27 +52,17 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.22</version>
         </dependency>
-<!--        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.3.2</version>
+        <dependency>
+            <groupId>com.sun.net.httpserver</groupId>
+            <artifactId>http</artifactId>
+            <version>20070405</version>
         </dependency>
         <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.10</version>
-        </dependency>        
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-        </dependency>
--->        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>1.4.185</version>
         </dependency>  
-       <dependency>
+        <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis</artifactId>
             <version>3.2.8</version>
@@ -84,6 +74,7 @@
         </dependency>
     </dependencies>  
     <build>
+        <finalName>${artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -100,7 +91,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.1.1</version>
+                <version>3.1.0</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <warName>${artifactId}</warName>
@@ -130,6 +121,18 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.wildfly.plugins</groupId>
+                <artifactId>wildfly-maven-plugin</artifactId>
+                <version>1.1.0.Final</version>
+                <configuration>
+<!--                    <hostname>127.0.0.1</hostname>
+                    <port>9990</port>
+                    <username>mkyong</username>
+                    <password>password</password>-->
+                    <name>${artifactId}.war</name>
+                </configuration>
             </plugin>
         </plugins>
     </build>
