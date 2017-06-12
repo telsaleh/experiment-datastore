@@ -77,7 +77,7 @@ public class StoreAccess {
             dbName = DB_NAME;
         }
 
-        String query = "INSERT INTO " + dbName + ".experiment"
+        String query = "INSERT INTO " + dbName + ".experiments"
                 + " (USER_ID, FEMO_ID, JOB_ID, TIME_STAMP, EXPR_RESULT)"
                 + " VALUES (?,?,?,?,?)";
 
@@ -97,7 +97,7 @@ public class StoreAccess {
 
             preparedStmt.execute();
 
-            System.out.println("Record is inserted into test2.experiment table!");
+            System.out.println("Record is inserted into "+dbName+".experiment table!");
 
         } catch (SQLException e) {
 
@@ -130,10 +130,10 @@ public class StoreAccess {
             dbName = DB_NAME;
         }
 
-        String selectSqlQuery = "SELECT FEMO_ID, JOB_ID, TIME_STAMP, EXPR_RESULT FROM " + dbName + ".experiment "
+        String selectSqlQuery = "SELECT FEMO_ID, JOB_ID, TIME_STAMP, EXPR_RESULT FROM " + dbName + ".experiments "
                 + "WHERE (USER_ID = \'" + userId + "\' AND (FEMO_ID = \'" + femoId + "\' OR JOB_ID = \'" + jobId + "\')) ORDER BY JOB_ID;";
 
-        String deleteSqlQuery = "DELETE FROM " + dbName + ".experiment "
+        String deleteSqlQuery = "DELETE FROM " + dbName + ".experiments "
                 + "WHERE (USER_ID = \'" + userId + "\' AND (FEMO_ID = \'" + femoId + "\' OR JOB_ID = \'" + jobId + "\')) ORDER BY JOB_ID;";
 
         String exprResult = "";

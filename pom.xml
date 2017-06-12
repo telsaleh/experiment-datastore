@@ -74,7 +74,7 @@
         </dependency>
     </dependencies>  
     <build>
-        <finalName>${artifactId}</finalName>
+        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -94,7 +94,7 @@
                 <version>3.1.0</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <warName>${artifactId}</warName>
+                    <warName>${project.artifactId}</warName>
                 </configuration>
             </plugin>
             <plugin>
@@ -131,7 +131,7 @@
                     <port>9990</port>
                     <username>mkyong</username>
                     <password>password</password>-->
-                    <name>${artifactId}.war</name>
+                    <name>${project.artifactId}.war</name>
                 </configuration>
             </plugin>
         </plugins>
