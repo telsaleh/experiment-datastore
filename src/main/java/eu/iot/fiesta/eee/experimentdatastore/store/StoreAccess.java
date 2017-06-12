@@ -68,8 +68,16 @@ public class StoreAccess {
 
         Connection dbConnection = null;
         Statement statement = null;
+        
+        String dbName = "";
 
-        String query = "INSERT INTO test2.experiment"
+        try {
+            dbName = StoreStartup.DB_NAME;
+        } catch (NoClassDefFoundError ex) {
+            dbName = DB_NAME;
+        }
+
+        String query = "INSERT INTO " + dbName + ".experiment"
                 + " (USER_ID, FEMO_ID, JOB_ID, TIME_STAMP, EXPR_RESULT)"
                 + " VALUES (?,?,?,?,?)";
 

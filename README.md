@@ -1,5 +1,3 @@
-# README #
-
 # FIESTA-IoT Experiment Result Store  
 
 ## Prerequisites  
@@ -83,17 +81,19 @@ https://{hostname}/experiment-result-store
 
 | Header  | Description  |
 |---|---| 
-|femoId|  FEMO ID for the experiment |
-|jobId| Job ID for the experiment process|
-|iPlanetDirectoryPro| Open AM token for the corresponding user. This will be used to identify the user  |
-|Content-type| The content type for the body when storing. This is always set to **application/json**  |
-|Accept| The accept type for the body when retrieving. This is always set to **application/json**  |
+|userId|  User ID for the experimenter. This is the same as the OpenAM username. |
+|femoId|  FEMO ID for the experiment. |
+|jobId| Job ID for the experiment process.|
+|iPlanetDirectoryPro| Open AM token for the corresponding user. This will be used to identify the user. |
+|Content-type| The content type for the body when storing. This is always set to **application/json**.|
+|Accept| The accept type for the body when retrieving. This is always set to **application/json**.|
 
 ### storeExprResult()  
 This method allows experiment results to be stored in persistence until it is retrieved by the experimenter.  
 ``` 
 POST /experiment-result-store HTTP/1.1
 Host: {hostname}
+userId: {userId}
 femoId: {femoId}
 jobId: {jobId}
 Content-Type: application/json
