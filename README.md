@@ -13,9 +13,9 @@
 A schema and table need to be created in the MySQL database. The following SQL script can be used to create it:
 
 ``` sql  
-CREATE SCHEMA IF NOT EXISTS ers;
+CREATE SCHEMA IF NOT EXISTS fiesta_iot_ers;
 
-CREATE TABLE IF NOT EXISTS ers.experiments (
+CREATE TABLE IF NOT EXISTS fiesta_iot_ers.experiments (
     USER_ID varchar(255),
     FEMO_ID varchar(255),
     JOB_ID varchar(255),
