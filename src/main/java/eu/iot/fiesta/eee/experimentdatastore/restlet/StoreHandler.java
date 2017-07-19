@@ -45,22 +45,27 @@ public class StoreHandler extends ServerResource {
         objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         
         ExperimentResult katResult = new ExperimentResult();
+        String result = "";
         
         try {
             katResult = objectMapper.readValue(reqBody, ExperimentResult.class);
         } catch (IOException ex) {
             Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
+            
         }
         
         StoreAccess sa = new StoreAccess();
+       
         try {
             sa.storeExperimentResult(userId, femoId, jobId, katResult);
+            result = "ok";
         } catch (SQLException ex) {
             Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
+            result = "Internal Error";
         }
         
 
-        return new StringRepresentation("done");
+        return new StringRepresentation(result);
     }
 
     @Get

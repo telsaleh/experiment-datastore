@@ -35,25 +35,14 @@ There are two Properties files under ***/WEB-INF/config***. db.properties is ded
 #### db.properties  
 
 ``` 
-#hostname for database
-hostname = localhost
-
-#port number for database
-port=3307
+#url for database
+eee.ers.db.username=jdbc:mysql://localhost:3306/fiesta_iot_ers
 
 #username for database
-username = {username}
+eee.ers.db.username=fiesta
 
 #password for database
-#on first run a database will be created with the password set below
-password = {password}
-
-#path for database
-#N.B: MAKE SURE DIRECTORY PATH IS ACCESSIBLE.
-#for mysql use database name, e.g. "/s2w"
-#for H2 use path and database name, e.g. "/~/" 
-#path=/~/sdr/
-name=test2
+eee.ers.db.password=fiesta
 
 ``` 
 #### global.properties  

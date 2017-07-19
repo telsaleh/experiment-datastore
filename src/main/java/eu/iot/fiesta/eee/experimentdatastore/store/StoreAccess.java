@@ -39,42 +39,24 @@ public class StoreAccess {
     private static final String DB_DRIVER = "com.mysql.jdbc.Driver";
     private static final String DB_USERNAME = "fiesta";
     private static final String DB_PASSWORD = "fiesta";
-    private static final String DB_NAME = "test2";
-    private static final String DB_CONNECTION = "jdbc:mysql://localhost:3307/" + DB_NAME;//?user=" + DB_USERNAME + "&password=" + DB_PASSWORD;
+    private static final String DB_CONNECTION = "jdbc:mysql://localhost:3307/fiesta_iot_ers";//?user=" + DB_USERNAME + "&password=" + DB_PASSWORD;
 
     private static final DateFormat DATE_FORMAT = new ISO8601DateFormat();
 
-    public static void main(String[] argv) {
-
-        StoreAccess sa = new StoreAccess();
-
-        System.out.println(DB_CONNECTION);
-
-        try {
-            try {
-                //            sa.storeExperimentResult("tarek", "567", "900", new ExperimentResult("test1"));
-                String exprResult = sa.getExperimentResult("surreyadmin", "567", "");
-                System.out.println("This is the json payload:\n" + exprResult);
-            } catch (JsonProcessingException ex) {
-                Logger.getLogger(StoreAccess.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(StoreAccess.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
-    public void storeExperimentResult(String userId, String femoId, String jobId, ExperimentResult result) throws SQLException {
+    public void storeExperimentResult(String userId, String femoId, String jobId, ExperimentResult result) throws SQLException { 
 
         Connection dbConnection = null;
         Statement statement = null;
         
         String dbName = "";
+        System.out.println("DB name: "+StoreStartup.DB_CONNECTION.split("/")[DB_CONNECTION.split("/").length-1]);
 
         try {
-            dbName = StoreStartup.DB_NAME;
+//            dbName = StoreStartup.DB_NAME;
+
+            dbName = StoreStartup.DB_CONNECTION.split("/")[DB_CONNECTION.split("/").length-1];
         } catch (NoClassDefFoundError ex) {
-            dbName = DB_NAME;
+            dbName = DB_CONNECTION.split("/")[DB_CONNECTION.split("/").length - 1]; 
         }
 
         String query = "INSERT INTO " + dbName + ".experiments"
@@ -90,14 +72,13 @@ public class StoreAccess {
             preparedStmt.setString(2, femoId);
             preparedStmt.setString(3, jobId);
             preparedStmt.setTimestamp(4, Timestamp.from(Instant.now()));
-            //preparedStmt.setTimestamp(4, Timestamp.valueOf(DATE_FORMAT.format(new Date())));
             preparedStmt.setString(5, result.getResult());
 
             System.out.println(preparedStmt.toString());
 
             preparedStmt.execute();
 
-            System.out.println("Record is inserted into "+dbName+".experiment table!");
+            System.out.println("Record is inserted into "+dbName+".experiments table!");
 
         } catch (SQLException e) {
 
@@ -125,9 +106,9 @@ public class StoreAccess {
         String dbName = "";
 
         try {
-            dbName = StoreStartup.DB_NAME;
+            dbName = StoreStartup.DB_CONNECTION.split("/")[DB_CONNECTION.split("/").length - 1];
         } catch (NoClassDefFoundError ex) {
-            dbName = DB_NAME;
+            dbName = DB_CONNECTION.split("/")[DB_CONNECTION.split("/").length - 1];
         }
 
         String selectSqlQuery = "SELECT FEMO_ID, JOB_ID, TIME_STAMP, EXPR_RESULT FROM " + dbName + ".experiments "
@@ -292,5 +273,23 @@ public class StoreAccess {
         return DATE_FORMAT.format(today.getTime());
 
     }
+    
+    public static void main(String[] argv) {
 
+        StoreAccess sa = new StoreAccess();
+
+        System.out.println(DB_CONNECTION);
+
+        try {
+            try {
+                //            sa.storeExperimentResult("tarek", "567", "900", new ExperimentResult("test1"));
+                String exprResult = sa.getExperimentResult("surreyadmin", "567", "");
+                System.out.println("This is the json payload:\n" + exprResult);
+            } catch (JsonProcessingException ex) {
+                Logger.getLogger(StoreAccess.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(StoreAccess.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }

@@ -7,6 +7,7 @@ package eu.iot.fiesta.eee.experimentdatastore.store;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class StoreStartup implements ServletContextListener {
 
     protected static String DB_HOSTNAME = "";
     protected static String DB_PORT = "";
-    protected static String DB_NAME = "";
+//    protected static String DB_NAME = "";
 
     protected static String DB_USERNAME = "";
     protected static String DB_PASSWORD = "";
@@ -53,22 +54,25 @@ public class StoreStartup implements ServletContextListener {
 
         Properties dbProp = new Properties();
         try {
-            String path = context.getInitParameter("db");
-            final InputStream is = context.getResourceAsStream(path);
-            dbProp.load(is);
+            String propertiesPath = System.getProperty("jboss.server.config.dir") + "/fiesta-iot.properties";
+            final FileInputStream fis = new FileInputStream(propertiesPath);
+            dbProp.load(fis);
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
+            String propertiesPath = context.getInitParameter("db");
+            final InputStream is = context.getResourceAsStream(propertiesPath);
+            try {
+                dbProp.load(is);                
+            } catch (IOException ex1) {
+                Logger.getLogger(StoreStartup.class.getName()).log(Level.SEVERE, null, ex1);
+            }
         }
-        DB_HOSTNAME = dbProp.getProperty("hostname");
-        DB_PORT = dbProp.getProperty("port");
-        DB_NAME = dbProp.getProperty("name");
 
-        DB_USERNAME = dbProp.getProperty("username");
-        DB_PASSWORD = dbProp.getProperty("password");
-        DB_CONNECTION = "jdbc:mysql://" + DB_HOSTNAME + ":" + DB_PORT + "/" + DB_NAME;
+        DB_USERNAME = dbProp.getProperty("eee.ers.db.USERNAME");
+        DB_PASSWORD = dbProp.getProperty("eee.ers.db.PASSWORD");
+        DB_CONNECTION = dbProp.getProperty("eee.ers.db.URL"); 
 
 //        runSqlScript();
-
     }
 
     public void runSqlScript() {
@@ -80,11 +84,11 @@ public class StoreStartup implements ServletContextListener {
                 Logger.getLogger(StoreStartup.class.getName()).log(Level.SEVERE, null, ex);
             }
             try {
-                System.out.println("DB access, using default path: "+ DB_CONNECTION);
+                System.out.println("DB access, using default path: " + DB_CONNECTION);
                 conn = DriverManager.getConnection(DB_CONNECTION, DB_USERNAME, DB_PASSWORD);
             } catch (MySQLSyntaxErrorException ex) {
-                System.out.println("DB not found, using default path: "+ DB_CONNECTION.replaceFirst(DB_NAME, ""));
-                conn = DriverManager.getConnection(DB_CONNECTION.replaceFirst(DB_NAME, ""), DB_USERNAME, DB_PASSWORD); 
+                System.out.println("DB not found, using default path: " + DB_CONNECTION.replaceFirst(DB_CONNECTION.split("/")[DB_CONNECTION.split("/").length - 1], ""));
+                conn = DriverManager.getConnection(DB_CONNECTION.replaceFirst(DB_CONNECTION.split("/")[DB_CONNECTION.split("/").length - 1], ""), DB_USERNAME, DB_PASSWORD);
             }
 
             try {
@@ -95,7 +99,7 @@ public class StoreStartup implements ServletContextListener {
                 // Execute script 
 //                sr.runScript(reader);
                 RunScript.execute(conn, reader);
-                System.out.println("Script executed"); 
+                System.out.println("Script executed");
             } catch (FileNotFoundException e) {
                 System.err.println("Failed to Execute" + EXPR_STORE_SCRIPT
                         + " The error is " + e.getMessage());

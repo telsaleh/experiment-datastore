@@ -17,4 +17,3 @@ CREATE TABLE IF NOT EXISTS fiesta_iot_ers.experiments (
     TIME_STAMP varchar(255),
     EXPR_RESULT MEDIUMTEXT
 );
-

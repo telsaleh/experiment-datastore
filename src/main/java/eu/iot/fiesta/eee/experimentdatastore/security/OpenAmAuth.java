@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import eu.iot.fiesta.eee.experimentdatastore.store.StoreStartup;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -35,16 +36,25 @@ public class OpenAmAuth {
 
     public OpenAmAuth() {
 
+        Properties globalProp = new Properties();
+        ServletContext context = StoreStartup.context;
+
         try {
-            Properties globalProp = new Properties();
-            ServletContext context = StoreStartup.context;
-            String path = context.getInitParameter("global");
-            final InputStream is = context.getResourceAsStream(path);
-            globalProp.load(is);
-            OPEN_AM_RESOLVE_USER_URL = globalProp.getProperty("hostname");
+
+            String propertiesPath = System.getProperty("jboss.server.config.dir") + "/fiesta-iot.properties";
+            final FileInputStream fis = new FileInputStream(propertiesPath);
+            globalProp.load(fis);
+            OPEN_AM_RESOLVE_USER_URL = globalProp.getProperty("eee.console.SECURITY_API_GETUSER");
         } catch (IOException | NoClassDefFoundError ex) {
             System.out.println(ex.getMessage());
-            OPEN_AM_RESOLVE_USER_URL = "https://platform-dev.fiesta-iot.eu/openam/json/users?_action=idFromSession";
+            try {
+                String propertiesPath = context.getInitParameter("global");
+                final InputStream is = context.getResourceAsStream(propertiesPath);
+                globalProp.load(is);
+                OPEN_AM_RESOLVE_USER_URL = globalProp.getProperty("eee.console.SECURITY_API_GETUSER");
+            } catch (IOException | NoClassDefFoundError e) {
+                OPEN_AM_RESOLVE_USER_URL = "https://platform-dev.fiesta-iot.eu/openam/json/users?_action=idFromSession";
+            }
         }
     }
 
@@ -61,9 +71,6 @@ public class OpenAmAuth {
         ClientResource oaClientRes = new ClientResource(context, OPEN_AM_RESOLVE_USER_URL);
         oaClientRes.setNext(client);
         oaClientRes.accept(MediaType.APPLICATION_JSON);
-//        Series<Header> headers = (Series<Header>) sicsClientResource.getRequestAttributes().get("org.restlet.http.headers");
-//        System.out.println(headers.size());
-//        headers.add("iPlanetDirectoryPro", openAmToken);
         oaClientRes.getRequest().getHeaders().add("iPlanetDirectoryPro", openAmToken);
         System.out.println(oaClientRes.getRequest().getHeaders().getFirstValue("iPlanetDirectoryPro"));
 
