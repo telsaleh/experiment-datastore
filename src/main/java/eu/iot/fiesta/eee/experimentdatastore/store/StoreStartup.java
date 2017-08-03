@@ -64,6 +64,7 @@ public class StoreStartup implements ServletContextListener {
             try {
                 dbProp.load(is);                
             } catch (IOException ex1) {
+                System.out.println("Error loading properties file: "+ex1.getLocalizedMessage());
                 Logger.getLogger(StoreStartup.class.getName()).log(Level.SEVERE, null, ex1);
             }
         }

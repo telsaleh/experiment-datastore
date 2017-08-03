@@ -74,7 +74,7 @@ public class StoreAccess {
             preparedStmt.setTimestamp(4, Timestamp.from(Instant.now()));
             preparedStmt.setString(5, result.getResult());
 
-            System.out.println(preparedStmt.toString());
+            System.out.println("Prepared Statement: "+ preparedStmt.toString());
 
             preparedStmt.execute();
 
@@ -113,6 +113,10 @@ public class StoreAccess {
 
         String selectSqlQuery = "SELECT FEMO_ID, JOB_ID, TIME_STAMP, EXPR_RESULT FROM " + dbName + ".experiments "
                 + "WHERE (USER_ID = \'" + userId + "\' AND (FEMO_ID = \'" + femoId + "\' OR JOB_ID = \'" + jobId + "\')) ORDER BY JOB_ID;";
+        
+        String selectSqlQueryWhere1 = "WHERE (USER_ID = \'" + userId + "\' AND (FEMO_ID = \'" + femoId + "\' AND JOB_ID = \'" + jobId + "\')) ORDER BY JOB_ID;";
+        String selectSqlQueryWhere2 = "WHERE (USER_ID = \'" + userId + "\' AND (FEMO_ID = \'" + femoId + "\')) ORDER BY JOB_ID;";
+        String selectSqlQueryWhere3 = "WHERE (USER_ID = \'" + userId + "\' AND (FEMO_ID = \'" + femoId + "\' AND JOB_ID = \'" + jobId + "\')) ORDER BY JOB_ID;";
 
         String deleteSqlQuery = "DELETE FROM " + dbName + ".experiments "
                 + "WHERE (USER_ID = \'" + userId + "\' AND (FEMO_ID = \'" + femoId + "\' OR JOB_ID = \'" + jobId + "\')) ORDER BY JOB_ID;";
@@ -230,9 +234,13 @@ public class StoreAccess {
 
         try {
 
+            System.out.println("Startup Driver: " + StoreStartup.DB_DRIVER);
             Class.forName(StoreStartup.DB_DRIVER);
+            
 
         } catch (ClassNotFoundException | java.lang.NoClassDefFoundError e) {
+            
+            System.out.println("Use coded Driver: " + DB_DRIVER);
 
             try {
                 Class.forName(DB_DRIVER);
