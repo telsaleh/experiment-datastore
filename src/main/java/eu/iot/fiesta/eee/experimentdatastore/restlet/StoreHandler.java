@@ -4,11 +4,11 @@
  */
 package eu.iot.fiesta.eee.experimentdatastore.restlet;
 
-import eu.iot.fiesta.eee.experimentdatastore.store.StoreAccess;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import eu.iot.fiesta.eee.experimentdatastore.store.StoreAccess;
 import eu.iot.fiesta.eee.experimentdatastore.model.ExperimentResult;
 import eu.iot.fiesta.eee.experimentdatastore.security.OpenAmAuth;
 import java.io.IOException;
@@ -29,10 +29,10 @@ import org.restlet.resource.ServerResource;
 import org.restlet.util.Series;
 
 public class StoreHandler extends ServerResource {
-
+    
     @Post
-    public Representation handleRegister(Representation entity) throws ResourceException, IOException {
-
+    public Representation handleRegister(Representation entity) throws IOException {
+                
         Series<Header> series = (Series<Header>) getRequestAttributes().get("org.restlet.http.headers");
         String userId = series.getFirstValue("userId", true);
         String femoId = series.getFirstValue("femoId", true);
@@ -47,23 +47,17 @@ public class StoreHandler extends ServerResource {
         ExperimentResult exprResult = new ExperimentResult();
         String result = "";
         
-        try {
-            exprResult = objectMapper.readValue(reqBody, ExperimentResult.class);
-        } catch (IOException ex) {
-            Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
-            
-        }
+        exprResult = objectMapper.readValue(reqBody, ExperimentResult.class);//            Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
         
         StoreAccess sa = new StoreAccess();
        
         try {
             sa.storeExperimentResult(userId, femoId, jobId, exprResult);
-            result = "ok";
+            result = "\n{\"status\": \"Result Stored\"}\n";
         } catch (SQLException ex) {
-            Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
-            result = "Internal Error";
-        }
-        
+//            Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
+            result = "\n{\"status\": \"Internal Error\"}\n";
+        }        
 
         return new StringRepresentation(result);
     }
@@ -72,7 +66,7 @@ public class StoreHandler extends ServerResource {
     public Representation handleLookup() {
 
         Series<Header> series = (Series<Header>) getRequestAttributes().get("org.restlet.http.headers");
-//      String userId = series.getValuesMap().keySet().toString();
+
         String tokenId = series.getFirstValue("iPlanetDirectoryPro", true);
         String femoId = series.getFirstValue("femoId", true);
         String jobId = series.getFirstValue("jobId", true);
@@ -90,15 +84,15 @@ public class StoreHandler extends ServerResource {
         String result = "";
         
          StoreAccess sa = new StoreAccess();
-        try {
+         try {
             try {
                 result = sa.getExperimentResult(userId, femoId, jobId);
-            } catch (JsonProcessingException ex) {
+            } catch (SQLException ex) {
                 Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
-        }
+         } catch (JsonProcessingException ex) {
+             Logger.getLogger(StoreHandler.class.getName()).log(Level.SEVERE, null, ex);
+         }
         return new StringRepresentation(result, MediaType.APPLICATION_JSON);
     }
 

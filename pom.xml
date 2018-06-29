@@ -24,14 +24,9 @@
             <id>sonatype-forge-snapshots</id>
             <url>https://repository.sonatype.org/content/groups/forge/</url>
         </repository>
-    </repositories> 
-    <dependencies>
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-web-api</artifactId>
-            <version>6.0</version>
-            <scope>provided</scope>
-        </dependency>   
+    </repositories>
+     
+    <dependencies>                          
         <dependency>
             <groupId>org.restlet.jee</groupId>
             <artifactId>org.restlet</artifactId>
@@ -43,9 +38,22 @@
             <version>2.3.8</version>
         </dependency>
         <dependency>
-            <groupId>org.restlet.jee</groupId>
-            <artifactId>org.restlet.ext.rdf</artifactId>
-            <version>2.3.2</version>
+            <!-- this dependency is important for this Restlet version to work on Wildfly!!! -->
+            <groupId>com.sun.net.httpserver</groupId>
+            <artifactId>http</artifactId>
+            <version>20070405</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.8.5</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-web-api</artifactId>
+            <version>6.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
@@ -53,26 +61,12 @@
             <version>5.1.22</version>
         </dependency>
         <dependency>
-            <groupId>com.sun.net.httpserver</groupId>
-            <artifactId>http</artifactId>
-            <version>20070405</version>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.185</version>
-        </dependency>  
-        <dependency>
-            <groupId>org.mybatis</groupId>
-            <artifactId>mybatis</artifactId>
-            <version>3.2.8</version>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.7.0</version>
+            <version>2.9.6</version>
         </dependency>
-    </dependencies>  
+    </dependencies>
+    
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
@@ -127,7 +121,7 @@
                 <artifactId>wildfly-maven-plugin</artifactId>
                 <version>1.1.0.Final</version>
                 <configuration>
-<!--                    <hostname>127.0.0.1</hostname>
+                    <!--                    <hostname>127.0.0.1</hostname>
                     <port>9990</port>
                     <username>mkyong</username>
                     <password>password</password>-->

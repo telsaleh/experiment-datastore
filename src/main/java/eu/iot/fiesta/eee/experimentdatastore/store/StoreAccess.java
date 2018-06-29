@@ -161,7 +161,7 @@ public class StoreAccess {
 
         }
         
-        deleteExprResults(deleteSqlQuery);
+//        deleteExprResults(deleteSqlQuery);
 
         return exprResult;
 
@@ -208,7 +208,7 @@ public class StoreAccess {
         try {
             exprResult = objectMapper.writeValueAsString(femoResults);
         } catch (JsonProcessingException ex) {
-            Logger.getLogger(StoreAccess.class.getName()).log(Level.SEVERE, null, ex);
+//            Logger.getLogger(StoreAccess.class.getName()).log(Level.SEVERE, null, ex);
         }
             
             return exprResult;
